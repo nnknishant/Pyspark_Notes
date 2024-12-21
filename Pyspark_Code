@@ -1,0 +1,67 @@
+emp_data = [(10, "Michel Robinson", "1999-06-01", "100", 2000),
+            (20, "James wood", "2003-03-01", "200", 8000),
+            (30, "Chrish andreew", "2005-04-01", "100", 6000),
+            (40, "Mark Bond", "2008-10-01", "100", 7000),
+            (50, "Steve Watson", "1996-02-01", "400", 1000),
+            (60, "Methew Simons", "1998-06-01", "500", 5000),
+            (70, "Peter Paul", "2001-06-01", "600", 5000)]
+
+
+emp_schema = ["employee_Id", "name", "doj", "employee_dept_id", "salary"]
+
+
+emp_df = spark.createDataFrame(data = emp_data, schema = emp_schema)
+
+emp_df.display()
+
+
+from pyspark.sql.functions import split
+
+df_split = emp_df.withColumn('First Name',split(emp_df['name'], ' ').getItem(0))\
+                 .withColumn('Last Name', split(emp_df['name'], ' ').getItem(1))
+
+df_split.display()
+
+
+df2 = emp_df.withColumn('First Name',split(emp_df['name'], ' ').getItem(0))\
+            .withColumn('Last Name', split(emp_df['name'], ' ').getItem(1))\
+            .withColumn('Joining_Year', split(emp_df['doj'], '-').getItem(0))\
+            .withColumn('Joining_Month', split(emp_df['doj'], '-').getItem(1))\
+             .withColumn('Joining_date', split(emp_df['doj'], '-').getItem(2))\
+            .drop(emp_df['name'])\
+            .drop(emp_df['doj'])
+
+df2.display()
+
+
+data_student = [("Raja", "Science", 80,"p", 90),
+                ("Rakesh", "Math", 90,"p", 70),
+                ("Rama", "English", 20,"p", 80),
+                ("Ramesh", "Science", 45,"F", 75),
+                ("Rajesh", "Math", 30,"F", 50),
+                ("Raghav", "Math", None,"NA", 70)]
+
+schema = ["name", "subject", "Marks", "status", "Attendence"]
+
+
+df = spark.createDataFrame(data = data_student, schema = schema)
+
+df.display()
+
+
+from pyspark.sql.functions import when
+
+df1 = df.withColumn('status', when(df.Marks >=50, "pass")
+                            .when(df.Marks<= 50, "fail")
+                            .otherwise("absentee"))
+
+
+df1.display()   
+
+from pyspark.sql.functions import when
+
+df2 = df.withColumn('Grade', when((df.Marks>=50) & (df.Attendence>=80), "distinction")
+                                .when((df.Marks<50) & (df.Attendence<=50), "Good")
+                                    .otherwise("Average"))
+
+df2.display()  
